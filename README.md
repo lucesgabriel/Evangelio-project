@@ -1,78 +1,108 @@
-# Evangelio del Día - Bot de WhatsApp
+# 🙏 Evangelio del Día - Bot Automatizado
 
 Este proyecto es un bot automatizado que obtiene el evangelio del día de un canal de YouTube específico, genera un resumen utilizando la API de Gemini, convierte el texto a audio y lo envía a través de WhatsApp.
 
-## 🚀 Características
+## 🌟 Características Principales
 
-- Obtiene automáticamente el evangelio del día desde YouTube
-- Genera resúmenes inteligentes usando Gemini AI
-- Convierte el texto a audio usando gTTS
-- Envía mensajes y archivos de audio por WhatsApp
-- Manejo de errores robusto y logging detallado
-- Autenticación OAuth2 para YouTube API
+- 📺 Obtención automática del evangelio del día desde YouTube
+- 🤖 Generación de resúmenes inteligentes usando Gemini AI
+- 🎧 Conversión de texto a audio usando OpenAI TTS (con fallback a gTTS)
+- 📱 Envío automático de mensajes y archivos de audio por WhatsApp
+- 📝 Transcripción automática de audio usando Whisper
+- 💾 Sistema de caché para optimizar las consultas
+- 🔄 Manejo robusto de errores y logging detallado
+
+## 🏗️ Estructura del Proyecto
+
+```
+Evangelio-project/
+├── src/
+│   ├── services/
+│   │   ├── youtube_service.py    # Gestión de YouTube API
+│   │   ├── gemini_service.py     # Integración con Gemini AI
+│   │   └── whatsapp_service.py   # Envío de mensajes WhatsApp
+│   ├── audio/
+│   │   ├── transcription_manager.py  # Transcripción de audio
+│   │   └── tts_converter.py      # Conversión texto a voz
+│   └── data/
+│       └── data_manager.py       # Gestión de caché y datos
+├── config/
+│   ├── __init__.py
+│   └── config.py                 # Configuración centralizada
+├── data/
+│   ├── cache/                    # Caché de videos y transcripciones
+│   └── credentials/              # Credenciales de APIs
+├── audio_files/                  # Archivos de audio temporales
+├── logs/                         # Registros del sistema
+├── .env                         # Variables de entorno
+├── main.py                      # Punto de entrada
+└── requirements.txt             # Dependencias
+```
 
 ## 📋 Requisitos Previos
 
 - Python 3.8 o superior
-- Cuenta de Google Cloud Platform con YouTube Data API v3 habilitada
-- Credenciales de API de Gemini
-- Cuenta de WhatsApp Business API
+- Cuenta de Google Cloud Platform con YouTube Data API v3
+- API Key de Gemini AI
+- API Key de OpenAI (para TTS y Whisper)
+- Cuenta de WhatsApp Business API (Green API)
 
-### Obtención de Credenciales
+## 🔑 Configuración de APIs
 
-1. **Gemini API Key**:
-   - Ve a https://makersuite.google.com/app/apikey
-   - Crea una cuenta si no la tienes
-   - Genera una nueva API key
+### 1. Gemini API
+- Obtén tu API key en [Google AI Studio](https://makersuite.google.com/app/apikey)
 
-2. **YouTube API y client-secret.json**:
-   - Ve a https://console.cloud.google.com/
-   - Crea un nuevo proyecto
-   - Habilita la YouTube Data API v3
-   - Ve a "Credenciales"
-   - Crea credenciales -> ID de cliente de OAuth
-   - Selecciona "Aplicación de escritorio"
-   - Descarga el archivo JSON y renómbralo a `client-secret.json`
+### 2. YouTube API
+- Configura un proyecto en [Google Cloud Console](https://console.cloud.google.com/)
+- Habilita YouTube Data API v3
+- Crea credenciales OAuth2 y descarga `client-secret.json`
 
-3. **WhatsApp Business API (Green API)**:
-   - Ve a https://green-api.com/
-   - Regístrate para obtener una cuenta
-   - Crea una nueva instancia
-   - Obtendrás:
-     - `WHATSAPP_ID_INSTANCE`
-     - `WHATSAPP_API_TOKEN`
+### 3. OpenAI API
+- Regístrate en [OpenAI Platform](https://platform.openai.com/)
+- Genera tu API key en la sección de configuración
 
-## 🔧 Configuración
+### 4. WhatsApp Business API
+- Regístrate en [Green API](https://green-api.com/)
+- Crea una nueva instancia y obtén tus credenciales
+
+## ⚙️ Configuración del Proyecto
 
 1. Clona el repositorio:
 ```bash
-git clone https://github.com/tu-usuario/evangelio-bot.git
-cd evangelio-bot
+git clone https://github.com/lucesgabriel/Evangelio-project.git
+cd Evangelio-project
 ```
 
-2. Instala las dependencias:
+2. Crea y activa un entorno virtual:
+```bash
+python -m venv evangelio-project_env
+source evangelio-project_env/bin/activate  # Linux/Mac
+.\evangelio-project_env\Scripts\activate   # Windows
+```
+
+3. Instala las dependencias:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Configura las variables de entorno en un archivo `.env`:
+4. Configura las variables de entorno en `.env`:
 ```env
 # API Keys
-GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_API_KEY=your_gemini_api_key
+OPENAI_API_KEY=your_openai_api_key
 
 # WhatsApp Configuration
 WHATSAPP_ID_INSTANCE=your_whatsapp_instance_id
 WHATSAPP_API_TOKEN=your_whatsapp_api_token
-# Número de WhatsApp en formato: país+número@c.us
-WHATSAPP_RECIPIENT=34612345678@c.us
+WHATSAPP_RECIPIENT=country_code+number@c.us
 
 # YouTube Channel Configuration
 CHANNEL_ID=your_youtube_channel_id
 ```
 
-4. Coloca tu archivo `client-secret.json` de Google OAuth2 en el directorio raíz
+5. Coloca el archivo `client-secret.json` en `data/credentials/`
 
-## 🎯 Uso
+## 🚀 Uso
 
 Para ejecutar el bot:
 
@@ -80,49 +110,35 @@ Para ejecutar el bot:
 python main.py
 ```
 
-La primera vez que ejecutes el programa, se abrirá una ventana del navegador solicitando autorización para acceder a YouTube. Las credenciales se guardarán en `token.pickle` para futuros usos.
+## 🔄 Flujo de Trabajo
 
-## 📁 Estructura del Proyecto
+1. **Obtención del Video**
+   - Busca el video del evangelio del día en el canal configurado
+   - Almacena la información en caché para optimizar futuras búsquedas
 
-```
-Proyecto_Evangelio/
-├── .env                    # Variables de entorno
-├── .gitignore             # Archivos ignorados por git
-├── README.md              # Este archivo
-├── requirements.txt       # Dependencias del proyecto
-├── client-secret.json     # Credenciales de OAuth2 de Google
-├── config.py             # Configuración y carga de variables de entorno
-├── youtube_fetcher.py    # Cliente de YouTube API
-├── gemini_api.py         # Cliente de Gemini AI
-├── tts_converter.py      # Conversor de texto a voz
-├── whatsapp_sender.py    # Cliente de WhatsApp
-└── main.py              # Punto de entrada principal
-```
+2. **Procesamiento del Contenido**
+   - Obtiene la transcripción del video (YouTube o Whisper)
+   - Genera un resumen usando Gemini AI
+   - Convierte el texto a audio usando OpenAI TTS
 
-## 🔒 Seguridad
+3. **Distribución**
+   - Envía el mensaje de texto por WhatsApp
+   - Envía el archivo de audio por WhatsApp
 
-- Nunca subas tu archivo `.env` o `client-secret.json` al repositorio
-- Mantén tus tokens y claves API seguros
-- Usa siempre variables de entorno para las credenciales
+## 🛠️ Mantenimiento
+
+- Los archivos de audio se limpian automáticamente después de su uso
+- El sistema de caché optimiza las consultas repetidas
+- Los logs detallados facilitan el debugging
 
 ## 🤝 Contribuciones
 
-Las contribuciones son bienvenidas. Por favor, abre un issue primero para discutir los cambios que te gustaría hacer.
+Las contribuciones son bienvenidas. Por favor:
+1. Haz fork del repositorio
+2. Crea una rama para tu feature
+3. Realiza tus cambios
+4. Envía un pull request
 
-## 📝 Notas
+## 📝 Licencia
 
-- El bot está configurado para buscar videos con el título "Evangelio del día" y la fecha actual
-- Los archivos de audio se almacenan temporalmente en la carpeta `audio_files/`
-- Se implementa un sistema de caché para las credenciales de YouTube
-
-## ⚠️ Manejo de Errores
-
-El proyecto incluye manejo de errores robusto para:
-- Fallos en la conexión API
-- Videos no encontrados
-- Errores de conversión de audio
-- Fallos en el envío de mensajes
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles. 
+Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles. 
