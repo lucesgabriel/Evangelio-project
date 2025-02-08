@@ -1,0 +1,8 @@
+from .config import (
+    GEMINI_API_KEY,
+    OPENAI_API_KEY,
+    WHATSAPP_ID_INSTANCE,
+    WHATSAPP_API_TOKEN,
+    WHATSAPP_RECIPIENT,
+    CHANNEL_ID
+)
